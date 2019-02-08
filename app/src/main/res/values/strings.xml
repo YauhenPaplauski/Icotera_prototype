@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Icotera_test</string>
+    <string name="icotera">Icotera</string>
+    <string name="start_scan">Start scan</string>
+    <string name="select_icotera_wifi">Select Icotera device wi-fi</string>
+    <string name="icotera_device_mac_subs">00:1e:80</string>
+    <string name="connect_to_wifi">Connect to Wi-fi network</string>
+</resources>
