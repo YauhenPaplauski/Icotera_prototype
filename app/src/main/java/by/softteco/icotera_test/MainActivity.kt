@@ -15,14 +15,12 @@ import by.softteco.icotera_test.utils.Constants.SHOW_PROGRESS
 import by.softteco.icotera_test.utils.Constants.UPDATE_PROGRESS
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import java.io.BufferedReader
-import java.io.FileNotFoundException
-import java.io.FileReader
 import java.io.IOException
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ConnectedDevicesAdapter
@@ -42,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onStartScanClicked() {
-        adapter?.clear()
+        adapter.clear()
         devicesList.gone()
         if (checkCurrentWifi()) scanNetwork()
     }
@@ -141,15 +139,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getMyIp(): String {
-        val wifiManger = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiManger = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val addrByteArray = BigInteger.valueOf(wifiManger.connectionInfo.ipAddress.toLong()).toByteArray()
         return InetAddress.getByAddress(addrByteArray).hostAddress
     }
 
+    private fun getMySubnetAddress(): String {
+        val wManger = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val address = wManger.dhcpInfo.gateway
+        return String.format(
+            "%d.%d.%d",
+            address and 0xff,
+            address shr 8 and 0xff,
+            address shr 16 and 0xff
+        )
+    }
+
+    private fun getMyIpAddress(): String {
+        val wifiMan = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInf = wifiMan.connectionInfo
+        val ipAddress = wifiInf.ipAddress
+        val ip = String.format(
+            "%d.%d.%d.%d",
+            ipAddress and 0xff,
+            ipAddress shr 8 and 0xff,
+            ipAddress shr 16 and 0xff,
+            ipAddress shr 24 and 0xff
+        )
+        return ip
+    }
+
     private fun checkCurrentWifi(): Boolean {
         var isOk = false
-
-        val wifiManger = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiManger = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (wifiManger.isWifiEnabled) {
             val wInfo = wifiManger.connectionInfo
             if (wInfo.bssid.startsWith(getString(R.string.icotera_device_mac_subs)))
@@ -160,48 +182,6 @@ class MainActivity : AppCompatActivity() {
             toast(getString(R.string.connect_to_wifi))
         }
         return isOk
-    }
-
-    private fun getMacAddressFromIP(ipFinding: String): String {
-        log_i("IPScanning", "Scan was started!")
-        var bufferedReader: BufferedReader? = null
-        try {
-            bufferedReader = BufferedReader(FileReader("/proc/net/arp"))
-
-            var line = bufferedReader.readLine()
-            while (line != null) {
-                val splitted = line.split(" +")
-                line = bufferedReader.readLine()
-                if (splitted.size >= 4) {
-                    val ip = splitted[0]
-                    val mac = splitted[3]
-                    if (mac.matches("..:..:..:..:..:..".toRegex()))
-                        if (ip.equals(ipFinding, ignoreCase = true)) return mac
-                }
-            }
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            try {
-                bufferedReader!!.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
-        return "00:00:00:00"
-    }
-
-    private fun getSubnetAddress(): String {
-        val wManger = getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val address = wManger.dhcpInfo.gateway
-        return String.format(
-            "%d.%d.%d",
-            address and 0xff,
-            address shr 8 and 0xff,
-            address shr 16 and 0xff
-        )
     }
 
     private fun toReadPingCache(): String {
