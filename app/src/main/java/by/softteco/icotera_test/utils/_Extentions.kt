@@ -29,4 +29,3 @@ fun onlyDebugConsume(f: () -> Unit) {
 }
 
 fun log_d(tag: String, msg: String) = onlyDebugConsume { Log.d(tag, msg) }
-fun log_i(tag: String, msg: String) = onlyDebugConsume { Log.i(tag, msg) }
