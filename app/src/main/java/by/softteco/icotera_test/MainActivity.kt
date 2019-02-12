@@ -13,6 +13,8 @@ import by.softteco.icotera_test.utils.*
 import by.softteco.icotera_test.utils.Constants.HIDE_PROGRESS
 import by.softteco.icotera_test.utils.Constants.SHOW_PROGRESS
 import by.softteco.icotera_test.utils.Constants.UPDATE_PROGRESS
+import com.stealthcopter.networktools.SubnetDevices
+import com.stealthcopter.networktools.subnet.Device
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
@@ -42,7 +44,41 @@ class MainActivity : AppCompatActivity() {
     private fun onStartScanClicked() {
         adapter.clear()
         devicesList.gone()
-        if (checkCurrentWifi()) scanNetwork()
+        if (checkCurrentWifi()) getSubnetDevices()
+        //scanNetwork()
+    }
+
+    private fun getSubnetDevices() {
+        val i = ""
+        val ip = getMyIp()
+        val ip2 = getMyIpAddress()
+        progressBar.visible()
+        startScanBtn.invisible()
+        toast("scan started")
+        val list = arrayListOf<Device>()
+        SubnetDevices.fromLocalAddress().findDevices(object : SubnetDevices.OnSubnetDeviceFound {
+            override fun onFinished(devicesFound: ArrayList<Device>?) {
+                checkAccessibilityOfDevices(list)
+            }
+
+            override fun onDeviceFound(device: Device?) {
+                device?.let {
+                    if (it.mac !== null && it.mac.startsWith(getString(R.string.icotera_device_mac_subs)))
+                        list.add(it)
+                }
+            }
+        })
+    }
+
+    private fun checkAccessibilityOfDevices(foundDevices: ArrayList<Device>) {
+        uiScope.launch {
+            toast("scan stopped")
+            startScanBtn.visible()
+            progressBar.invisible()
+
+            devicesList.visible()
+            adapter.refreshData(foundDevices)
+        }
     }
 
     // dispatches execution into Android main thread
@@ -67,7 +103,7 @@ class MainActivity : AppCompatActivity() {
             progressBar.invisible()
 
             devicesList.visible()
-            adapter.refreshData(connDevices)
+//            adapter.refreshData(connDevices)
         }
     }
 
