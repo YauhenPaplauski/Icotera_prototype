@@ -9,11 +9,12 @@ class NetDevice(line: String) {
 //    var device: String
 
     private val macAddrRegex = "..:..:..:..:..:..".toRegex()
-    val IPADDRESS_PATTERN =
+    private val IPADDRESS_PATTERN =
         "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
     private val ipAddrRegex = IPADDRESS_PATTERN.toRegex()
 
     init {
+//        line.split("\\ +".toRegex())
         macAddrRegex.find(line)?.let {
             hwAddr = it.value
         }

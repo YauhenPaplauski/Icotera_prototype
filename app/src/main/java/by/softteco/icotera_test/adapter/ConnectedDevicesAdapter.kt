@@ -7,11 +7,9 @@ import android.view.ViewGroup
 import by.softteco.icotera_test.R
 import by.softteco.icotera_test.databinding.ConnectedDeviceItemBinding
 import by.softteco.icotera_test.models.NetDevice
-import com.stealthcopter.networktools.subnet.Device
-import java.net.InetAddress
 
 class ConnectedDevicesAdapter : RecyclerView.Adapter<ConnectedDevicesAdapter.DeviceVH>() {
-    private var list = arrayListOf<Device>()
+    private var list = arrayListOf<NetDevice>()
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): DeviceVH {
         val databinding =
@@ -30,7 +28,7 @@ class ConnectedDevicesAdapter : RecyclerView.Adapter<ConnectedDevicesAdapter.Dev
         holder.bind(list[pos])
     }
 
-    fun refreshData(connDevices: ArrayList<Device>) {
+    fun refreshData(connDevices: ArrayList<NetDevice>) {
         list.clear()
         list.addAll(connDevices)
         notifyDataSetChanged()
@@ -41,8 +39,12 @@ class ConnectedDevicesAdapter : RecyclerView.Adapter<ConnectedDevicesAdapter.Dev
         notifyDataSetChanged()
     }
 
+    fun addDevice(netDevice: NetDevice) {
+        list.add(netDevice)
+    }
+
     inner class DeviceVH(private val binding: ConnectedDeviceItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(device: Device) {
+        fun bind(device: NetDevice) {
             binding.device = device
             binding.executePendingBindings()
         }

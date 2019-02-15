@@ -41,7 +41,7 @@ inline fun <reified T> create(): T {
     return retrofit.create(T::class.java)
 }
 
-val server: IcoteraApi
+val api: IcoteraApi
     get() = Services.icoteraApi
 
 data class Result<out T>(val data: T? = null, val error: Error? = null) {
