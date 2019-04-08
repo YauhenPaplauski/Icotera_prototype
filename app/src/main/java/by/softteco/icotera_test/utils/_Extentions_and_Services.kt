@@ -25,7 +25,7 @@ inline fun <reified T> create(): T {
         .connectTimeout(1, TimeUnit.SECONDS)
 
     onlyDebugConsume {
-        val loggingInterceptor = HttpLoggingInterceptor() { l -> log_d("HTTP", l) }
+        val loggingInterceptor = HttpLoggingInterceptor { l -> log_d("HTTP", l) }
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         httpClientBuilder.addInterceptor(loggingInterceptor)
     }

@@ -7,9 +7,7 @@ import retrofit2.http.Headers
 import retrofit2.http.Url
 
 class IcoteraApiImpl : IcoteraApi {
-    private val service: IcoteraRestService by lazy {
-        create<IcoteraRestService>()
-    }
+    private val service: IcoteraRestService by lazy { create<IcoteraRestService>() }
 
     override suspend fun getSystemInfoUnauthAsync(targetHost: String): Result<GetSystemInfoUnathorized> {
         val url = "http://$targetHost/index.cgi?mode=app10&req=get_systeminfo_unauth"

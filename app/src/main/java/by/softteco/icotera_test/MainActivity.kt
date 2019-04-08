@@ -4,22 +4,25 @@ import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Message
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import by.softteco.icotera_test.adapter.ConnectedDevicesAdapter
 import by.softteco.icotera_test.models.NetDevice
 import by.softteco.icotera_test.utils.*
+import by.softteco.icotera_test.utils.Constants.BEFORE_API_QUERY_STARTED
+import by.softteco.icotera_test.utils.Constants.BEFORE_PING_STARTED
 import by.softteco.icotera_test.utils.Constants.HIDE_PROGRESS
 import by.softteco.icotera_test.utils.Constants.SHOW_PROGRESS
-import by.softteco.icotera_test.utils.Constants.UPDATE_PROGRESS
+import by.softteco.icotera_test.utils.Constants.UPDATE_API_QUERY_PROGRESS
+import by.softteco.icotera_test.utils.Constants.UPDATE_PING_PROGRESS
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.NetworkInterface
-import java.net.UnknownHostException
 import kotlin.experimental.and
 
 class MainActivity : AppCompatActivity() {
@@ -45,9 +48,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onStartScanClicked() {
-        adapter.clear()
-        devicesList.gone()
-        if (checkCurrentWifi()) scanNetwork()
+        if (isIcoteraDeviceNetwork()) scanNetwork()
     }
 
     // dispatches execution into Android main thread
@@ -59,86 +60,130 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanNetwork() {
         uiScope.launch {
-            progressBar.visible()
-            startScanBtn.invisible()
-            toast("scan started")
+            adapter.clear()
+            scanStarted()
             GlobalScope.async {
                 pingNetwork()
             }.await()
-            toast("scan stopped")
-            startScanBtn.visible()
-            progressBar.invisible()
-            devicesList.visible()
+            scanStopped()
         }
+    }
+
+    private fun scanStarted() {
+        devicesList.gone()
+        progressBar.visible()
+        infoBox.visible()
+        startScanBtn.invisible()
+        toast("scan started")
+        progressHandler.sendEmptyMessage(SHOW_PROGRESS)
+    }
+
+    private fun scanStopped() {
+        progressHandler.sendEmptyMessageDelayed(HIDE_PROGRESS, 300)
+        toast("scan stopped")
+        startScanBtn.visible()
+        progressBar.invisible()
+        devicesList.visible()
+        infoBox.gone()
     }
 
     private val progressHandler = Handler(Handler.Callback { message ->
         when (message.what) {
             SHOW_PROGRESS -> {
                 pingProgress.visible()
-                progressCounter = 0
-                pingProgress.max = (networkEnd - networkStart).toInt()
             }
             HIDE_PROGRESS -> pingProgress.gone()
-            UPDATE_PROGRESS -> {
+            BEFORE_PING_STARTED -> {
+                progressCounter = 0
+                pingProgress.max = (networkEnd - networkStart).toInt()
+                processInfoText.text = ""
+            }
+            UPDATE_PING_PROGRESS -> {
                 progressCounter++
                 pingProgress.progress = progressCounter
-                if (adapter.itemCount > 0) adapter.notifyDataSetChanged()
+                processInfoText.text = message.obj.toString()
+                //TODO update list in realtime  if (adapter.itemCount > 0) adapter.notifyDataSetChanged()
             }
-
+            BEFORE_API_QUERY_STARTED -> {
+                progressCounter = 0
+                pingProgress.progress = 0
+                pingProgress.max = message.arg1
+                processInfoText.text = getString(R.string.querying_devices)
+            }
+            UPDATE_API_QUERY_PROGRESS -> {
+                progressCounter++
+                pingProgress.progress = progressCounter
+            }
         }
         false
     })
 
     private suspend fun pingNetwork() {
+//        possible
 //        10.0.0.0/8
 //        172.16.0.0/12
 //        192.168.0.0/16
         calculateRange()
-        progressHandler.sendEmptyMessage(SHOW_PROGRESS)
-        try {
-            for (addr in networkEnd downTo networkStart) {
-                val i = InetAddress.getByAddress(BigInteger.valueOf(addr).toByteArray())
-                i.isReachable(10)
-                progressHandler.sendEmptyMessage(UPDATE_PROGRESS)
-            }
+        pingAllIpInRange()
+        parsePingCache()
 
-            val exampleMac = getString(R.string.icotera_device_mac_subs)
-            val macAddrs = toReadPingCache()
-            for (item in macAddrs.split("\n")) {
-                if (item.contains(exampleMac)) {
-                    val netDevice = NetDevice(item)
-                    val result = api.getSystemInfoUnauthAsync(netDevice.ipAddr)
-                    if (result.isSuccess) {
-                        adapter.addDevice(netDevice)
-                        progressHandler.sendEmptyMessage(UPDATE_PROGRESS)
-                    }
-                }
-            }
-        } catch (ex: UnknownHostException) {
-        } catch (ex: IOException) {
+//        try {
+//        } catch (ex: UnknownHostException) {
+//        } catch (ex: IOException) {
+//        }
+    }
+
+    private fun pingAllIpInRange() {
+        progressHandler.sendEmptyMessage(BEFORE_PING_STARTED)
+        for (addr in networkEnd downTo networkStart) {
+            val i = InetAddress.getByAddress(BigInteger.valueOf(addr).toByteArray())
+            i.isReachable(10)
+
+            val msg = Message()
+            msg.what = UPDATE_PING_PROGRESS
+            msg.obj = i.toString()
+            progressHandler.sendMessage(msg)
         }
-        progressHandler.sendEmptyMessage(HIDE_PROGRESS)
+    }
+
+    private suspend fun parsePingCache() {
+        val cache = readPingCache()
+        initBeforePing(cache.size)
+        for (item in cache) {
+            val netDevice = NetDevice(item)
+            val result = api.getSystemInfoUnauthAsync(netDevice.ipAddr)
+            if (result.isSuccess) {
+                adapter.addDevice(netDevice)
+                progressHandler.sendEmptyMessage(UPDATE_API_QUERY_PROGRESS)
+            }
+        }
+    }
+
+    private fun initBeforePing(size: Int) {
+        val msg = Message()
+        msg.arg1 = size
+        msg.what = BEFORE_API_QUERY_STARTED
+        progressHandler.sendMessage(msg)
     }
 
     private fun getGateway(): String {
-        val wManger = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        return intToIp(wManger.dhcpInfo.gateway)
+        return intToIp(getWManager().dhcpInfo.gateway)
     }
 
     private fun getNetMask(): String {
-        val wManger = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        return intToIp(wManger.dhcpInfo.netmask)
+        return intToIp(getWManager().dhcpInfo.netmask)
     }
 
     private fun getMyIpAddress(): String {
-        val wifiMan = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        return intToIp(wifiMan.connectionInfo.ipAddress)
+        return intToIp(getWManager().connectionInfo.ipAddress)
     }
 
     private fun getIpAddress(): Long {
-        val wifiMan = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        return wifiMan.connectionInfo.ipAddress.toLong()
+        return getWManager().connectionInfo.ipAddress.toLong()
+    }
+
+    private fun getWManager(): WifiManager {
+        return applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     }
 
     private fun intToIp(addr: Int): String {
@@ -151,22 +196,21 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun checkCurrentWifi(): Boolean {
-        var isOk = false
-        val wifiManger = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    private fun isIcoteraDeviceNetwork(): Boolean {
+        val wifiManger = getWManager()
         if (wifiManger.isWifiEnabled) {
             val wInfo = wifiManger.connectionInfo
             if (wInfo.bssid.startsWith(getString(R.string.icotera_device_mac_subs)))
-                isOk = true
+                return true
             else
                 toast(getString(R.string.select_icotera_wifi))
-        } else {
+        } else
             toast(getString(R.string.connect_to_wifi))
-        }
-        return isOk
+        return false
     }
 
-    private fun toReadPingCache(): String {
+    private fun readPingCache(): List<String> {
+        val icoteraMacExample = getString(R.string.icotera_device_mac_subs)
         val args = listOf("cat", "/proc/net/arp")
         val cmd: ProcessBuilder
         var result = ""
@@ -178,15 +222,16 @@ class MainActivity : AppCompatActivity() {
             val `in` = process.inputStream
             val re = ByteArray(1024)
             while (`in`.read(re) !== -1) {
-                println(String(re))
-                result = result + String(re)
+                if (String(re).contains(icoteraMacExample)) {
+                    println(String(re))
+                    result += String(re)
+                }
             }
             `in`.close()
         } catch (ex: IOException) {
             ex.printStackTrace()
         }
-
-        return result
+        return result.split("\n").filter { it.contains(icoteraMacExample) }
     }
 
     private fun convertNetmaskToCIDR(maskIp: String): Int {
