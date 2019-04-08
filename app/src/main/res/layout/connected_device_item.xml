@@ -6,25 +6,49 @@
 
         <variable
             name="device"
-            type="by.softteco.icotera_test.models.NetDevice" />
+            type="by.softteco.icotera_test.models.CfgInfoUnath" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{device.ipAddr}"
-            tools:text="hostAddress = 192.168.0.1" />
+            android:text="@{device.resp_data.resp_body.discovery_self_info.dev_label}"
+            android:textColor="@android:color/black"
+            tools:text="Wi-Fi AP" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{device.hwAddr}"
+            android:text="@{device.resp_data.resp_body.discovery_self_info.dev_name}"
+            android:textColor="@android:color/black"
+            tools:text="i3550" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{device.resp_data.resp_body.discovery_self_info.dev_ipv4}"
+            android:textColor="@android:color/black"
+            tools:text="192.168.0.1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{device.resp_data.resp_body.discovery_self_info.dev_role}"
+            android:textColor="@android:color/black"
+            tools:text="MASTER" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{device.resp_data.resp_body.discovery_self_info.dev_mac}"
+            android:textColor="@android:color/black"
             tools:text="00:1e:80:89:a3:dc" />
 
     </LinearLayout>

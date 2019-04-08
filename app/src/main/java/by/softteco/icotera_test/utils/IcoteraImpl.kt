@@ -9,7 +9,7 @@ import retrofit2.http.Url
 class IcoteraApiImpl : IcoteraApi {
     private val service: IcoteraRestService by lazy { create<IcoteraRestService>() }
 
-    override suspend fun getSystemInfoUnauthAsync(targetHost: String): Result<CfgInfoUnath> {
+    override suspend fun getCfgInfoUnauth(targetHost: String): Result<CfgInfoUnath> {
         val url = "http://$targetHost/index.cgi?mode=app10&req=get_cfginfo_unauth"
         return service.getSystemInfoUnauthAsync(url).executeAsyncAndHandleError()
     }

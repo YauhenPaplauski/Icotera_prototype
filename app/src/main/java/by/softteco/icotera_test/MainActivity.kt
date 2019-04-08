@@ -151,9 +151,9 @@ class MainActivity : AppCompatActivity() {
         initBeforePing(cache.size)
         for (item in cache) {
             val netDevice = NetDevice(item)
-            val result = api.getSystemInfoUnauthAsync(netDevice.ipAddr)
+            val result = api.getCfgInfoUnauth(netDevice.ipAddr)
             if (result.isSuccess) {
-                adapter.addDevice(netDevice)
+                adapter.addDevice(result.data!!)
                 progressHandler.sendEmptyMessage(UPDATE_API_QUERY_PROGRESS)
             }
         }

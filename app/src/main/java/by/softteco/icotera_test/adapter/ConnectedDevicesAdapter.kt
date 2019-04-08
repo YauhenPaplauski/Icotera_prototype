@@ -6,10 +6,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import by.softteco.icotera_test.R
 import by.softteco.icotera_test.databinding.ConnectedDeviceItemBinding
+import by.softteco.icotera_test.models.CfgInfoUnath
 import by.softteco.icotera_test.models.NetDevice
 
 class ConnectedDevicesAdapter : RecyclerView.Adapter<ConnectedDevicesAdapter.DeviceVH>() {
-    private var list = arrayListOf<NetDevice>()
+    private var list = arrayListOf<CfgInfoUnath>()
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): DeviceVH {
         val databinding =
@@ -28,23 +29,34 @@ class ConnectedDevicesAdapter : RecyclerView.Adapter<ConnectedDevicesAdapter.Dev
         holder.bind(list[pos])
     }
 
-    fun refreshData(connDevices: ArrayList<NetDevice>) {
-        list.clear()
-        list.addAll(connDevices)
-        notifyDataSetChanged()
-    }
+//    fun refreshData(connDevices: ArrayList<NetDevice>) {
+//        list.clear()
+//        list.addAll(connDevices)
+//        notifyDataSetChanged()
+//    }
 
     fun clear() {
         list.clear()
         notifyDataSetChanged()
     }
 
-    fun addDevice(netDevice: NetDevice) {
-        list.add(netDevice)
+//    fun addDevice(netDevice: NetDevice) {
+//        list.add(netDevice)
+//    }
+
+    fun addDevice(icoteraDevice: CfgInfoUnath) {
+        list.add(icoteraDevice)
     }
 
+    //    inner class DeviceVH(private val binding: ConnectedDeviceItemBinding) : RecyclerView.ViewHolder(binding.root) {
+//        fun bind(device: NetDevice) {
+//            binding.device = device
+//            binding.executePendingBindings()
+//        }
+//
+//    }
     inner class DeviceVH(private val binding: ConnectedDeviceItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(device: NetDevice) {
+        fun bind(device: CfgInfoUnath) {
             binding.device = device
             binding.executePendingBindings()
         }
