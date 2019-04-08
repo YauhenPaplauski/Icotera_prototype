@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             adapter.clear()
             scanStarted()
             GlobalScope.async {
-                pingNetwork()
+                discoverIcoteraDevices()
             }.await()
             scanStopped()
         }
@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         false
     })
 
-    private suspend fun pingNetwork() {
+    private suspend fun discoverIcoteraDevices() {
 //        possible
 //        10.0.0.0/8
 //        172.16.0.0/12
