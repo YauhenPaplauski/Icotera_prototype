@@ -74,13 +74,13 @@ class MainActivity : AppCompatActivity() {
         progressBar.visible()
         infoBox.visible()
         startScanBtn.invisible()
-        toast("scan started")
+        toast(getString(R.string.start_scanning))
         progressHandler.sendEmptyMessage(SHOW_PROGRESS)
     }
 
     private fun scanStopped() {
         progressHandler.sendEmptyMessageDelayed(HIDE_PROGRESS, 300)
-        toast("scan stopped")
+        toast(getString(R.string.scan_finished))
         startScanBtn.visible()
         progressBar.invisible()
         devicesList.visible()

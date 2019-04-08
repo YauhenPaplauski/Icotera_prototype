@@ -1,6 +1,6 @@
 package by.softteco.icotera_test.models
 
-data class GetSystemInfoUnathorized(
+data class CfgInfoUnath(
     val timestamp: Long,
     val magic: String,
     val trlock: Int,
@@ -11,6 +11,7 @@ data class GetSystemInfoUnathorized(
     val dbsync: Int,
     val authtype: Int,
     val idx_lang: Int,
-    val resp_data: Any,
+    val sid: String,
+    val resp_data: ResponseData,
     val EoO: String
 )

@@ -1,8 +1,7 @@
 package by.softteco.icotera_test.utils
 
-import by.softteco.icotera_test.models.GetSystemInfoUnathorized
-import by.softteco.icotera_test.utils.Result
+import by.softteco.icotera_test.models.CfgInfoUnath
 
 interface IcoteraApi {
-    suspend fun getSystemInfoUnauthAsync(targetHost: String): Result<GetSystemInfoUnathorized>
+    suspend fun getSystemInfoUnauthAsync(targetHost: String): Result<CfgInfoUnath>
 }
