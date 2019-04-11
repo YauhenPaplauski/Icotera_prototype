@@ -1,13 +1,42 @@
-gradlew
+#built application files
+*.apk
+*.ap_
 
-gradlew.bat
+# files for the dex VM
+*.dex
 
-.gradle/
+# Java class files
+*.class
 
-.idea/
+# generated files
+bin/
+gen/
 
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Windows thumbnail db
+Thumbs.db
+
+# OSX files
+.DS_Store
+
+# Eclipse project files
+.classpath
+.project
+
+# Android Studio
 *.iml
+.idea
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+.gradle
+build/
 
-/local.properties
+# Subversion
+.svn
 
-/gradle
+# Secrets
+fastlane/secrets/*.*
+
+# Fastlane build artefacts
+fastlane/report.xml
