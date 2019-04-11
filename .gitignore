@@ -32,7 +32,16 @@ Thumbs.db
 .gradle
 build/
 gradlew
+
 gradlew.bat
+
+.gradle/
+
+.idea/
+
+/local.properties
+
+/gradle
 
 # Subversion
 .svn
