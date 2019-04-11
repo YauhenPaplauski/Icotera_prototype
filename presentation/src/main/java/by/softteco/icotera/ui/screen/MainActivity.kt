@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import by.softteco.icotera.ui.base.BaseActivity
 import by.softteco.icotera.usecase.cfgInfo.GetCfgInfoUnauthUseCase
+import by.softteco.icotera.R
 import javax.inject.Inject
 
 class MainActivity : BaseActivity() {

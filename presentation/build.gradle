@@ -28,6 +28,7 @@ android {
 
 dependencies {
     def dagger = "2.16"
+    def androidSupportVersion = "28.0.0"
     def androidx_version = '1.1.0-alpha04'
     def constraint_layout_version = '1.1.3'
 
@@ -38,12 +39,16 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$androidx_version"
     implementation "androidx.constraintlayout:constraintlayout:$constraint_layout_version"
 
+//    implementation "com.android.support:appcompat-v7:$androidSupportVersion"
+//    implementation "com.android.support:design:$androidSupportVersion"
+//    implementation "com.android.support:recyclerview-v7:$androidSupportVersion"
+
     //dagger
     implementation "com.google.dagger:dagger:$dagger"
     kapt "com.google.dagger:dagger-compiler:$dagger"
-    implementation "com.google.dagger:dagger-android:$dagger"
-    implementation "com.google.dagger:dagger-android-support:$dagger"
-    kapt "com.google.dagger:dagger-android-processor:$dagger"
+//    implementation "com.google.dagger:dagger-android:$dagger"
+//    implementation "com.google.dagger:dagger-android-support:$dagger"
+//    kapt "com.google.dagger:dagger-android-processor:$dagger"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {
